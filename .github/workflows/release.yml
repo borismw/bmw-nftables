@@ -7,7 +7,7 @@ on:
       - 'v*'
 env:
   PKG_NAME: bmw-nftables
-  REPOSITORY_NAME: bmw_nftables
+  REPOSITORY_NAME: bmw-nftables
 
 jobs:
   release:
