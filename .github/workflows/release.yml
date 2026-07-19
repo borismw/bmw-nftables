@@ -66,7 +66,7 @@ jobs:
         working-directory: src/${{ env.PKG_NAME }}-aur
         run: |
           sed -i "s/^pkgver=.*/pkgver=${{ steps.version.outputs.version }}/" PKGBUILD
-          sed -i "s/^sha256sums=.*/sha256sums=(\"${{ steps.checksum.outputs.sha256 }}\",\"SKIP\")/" PKGBUILD
+          sed -i "s/^sha256sums=.*/sha256sums=(\"${{ steps.checksum.outputs.sha256 }}\" \"SKIP\")/" PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
 
       - name: Create PR
