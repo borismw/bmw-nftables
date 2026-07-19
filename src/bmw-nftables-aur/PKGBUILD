@@ -11,7 +11,7 @@ backup=('etc/nftables.conf')
 install='bmw-nftables-rules.install'
 source=("https://github.com/borismw/bmw-nftables/releases/download/bmw-nftables/v${pkgver}/${pkgname}-${pkgver}-sources.tar.gz" "https://github.com/borismw/bmw-nftables/releases/download/bmw-nftables/v${pkgver}/${pkgname}-${pkgver}-sources.tar.gz.sig")
 validpgpkeys=("FAFBEC9638D5B553EE404868A6856139D938A2B5")
-sha256sums=("SKIP" "SKIP")
+sha256sums=("6b0b140dc13fda30d0e939adcdd5ad822b45eea65888fb81c7dc2508a8627ed7" "313799b792d48094a8d77e37011331f41d58ece8af83e379963801f291f6e939")
 
 pkgver() {
     echo "$pkgver"
