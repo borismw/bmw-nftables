@@ -1,0 +1,25 @@
+# Maintainer: borismw <mail@boriswagner.net>
+pkgname=bmw-nftables-rules
+pkgver=0.0.1
+pkgrel=1
+pkgdesc='Modular firewall ruleset on top of nftables'
+arch=('any')
+url='https://github.com/borismw/infrastructure-setup/tree/main/src/config/aur/bmw-nftables'
+license=('MIT')
+depends=('nftables' 'networkmanager')
+backup=('etc/nftables.conf')
+install='bmw-nftables-rules.install'
+source=("https://github.com/borismw/bmw-nftables/releases/download/bmw-nftables/v${pkgver}/${pkgname}-${pkgver}-sources.tar.gz" "https://github.com/borismw/bmw-nftables/releases/download/bmw-nftables/v${pkgver}/${pkgname}-${pkgver}-sources.tar.gz.sig")
+validpgpkeys=("FAFBEC9638D5B553EE404868A6856139D938A2B5")
+sha256sums=("SKIP" "SKIP")
+
+pkgver() {
+    echo "$pkgver"
+}
+
+package() {
+    install -Dm 644 "$srcdir/etc/nftables-main.rules" "$pkgdir/etc/nftables-main.rules"
+    for file in "$srcdir"/etc/nftables/*.rules; do
+        install -Dm 644 "$file" "$pkgdir/etc/nftables/${file##*/}"
+    done
+}

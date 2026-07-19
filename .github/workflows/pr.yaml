@@ -1,0 +1,25 @@
+---
+name: ci_pr
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - src/**
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Prepare for Bash Unit-Testing
+        run: sudo apt update && sudo apt install shunit2 shfmt
+      - name: Lint
+        id: unit-tests
+        run: make lint

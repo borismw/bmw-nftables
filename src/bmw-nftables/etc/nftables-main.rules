@@ -1,0 +1,96 @@
+#!/usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+table netdev filter {
+
+  counter netdev_drop { }
+  
+  chain ingress_filter {
+    # Drop all fragments
+    ip frag-off & 0x1fff != 0 counter name netdev_drop drop
+
+    # Drop XMAS packets
+    tcp flags & (fin|syn|rst|psh|ack|urg) == fin|syn|rst|psh|ack|urg counter name netdev_drop drop
+
+    # Drop NULL packets
+    tcp flags & (fin|syn|rst|psh|ack|urg) == 0x0 counter name netdev_drop drop
+
+    # Drop uncommon MSS values
+    tcp flags syn tcp option maxseg size 1-535 counter name netdev_drop drop
+  }
+}
+
+# IPv4/IPv6 Simple & Safe firewall ruleset.
+# More examples in /usr/share/nftables/ and /usr/share/doc/nftables/examples/.
+
+destroy table inet firewall
+table inet firewall {
+  chain inbound {
+    type filter hook input priority 200; policy drop;
+
+    iifname incusbr0 udp dport { 67,547 } counter accept
+    
+    counter jump input_hook
+    counter jump base_filter
+
+    log prefix "[nftables] Inbound denied: " counter drop
+  }
+
+  chain input_hook {}
+
+  chain base_filter {
+    counter jump drop_filter
+    
+    ct state vmap {
+      established : accept,
+      related : accept,
+      new : continue,
+      invalid : drop
+    }
+
+    iifname lo counter accept
+    oifname lo counter accept
+  }
+
+  chain drop_filter {}
+  
+  chain forward_hook {}
+
+  chain forward {
+    # Assume device is not a router
+    type filter hook forward priority 200; policy drop;
+
+    counter jump forward_hook
+    counter jump base_filter
+
+    log prefix "[nftables] Forward denied: " counter drop
+  }
+
+  chain output {
+    type filter hook output priority 0; policy accept;
+#    counter jump output_hook
+#    counter jump base_filter
+
+    # log prefix "[nftables] Outbound denied: " counter reject
+  }
+
+  chain output_hook {}
+}
+
+table ip nat {
+  chain prerouting {
+    type nat hook prerouting priority 0
+    jump prerouting_hook
+  }
+
+  chain prerouting_hook {}
+
+  chain postrouting {
+    type nat hook postrouting priority 500
+    jump postrouting_hook
+  }
+
+  chain postrouting_hook {}
+}
+
+include "/etc/nftables/*.rules"

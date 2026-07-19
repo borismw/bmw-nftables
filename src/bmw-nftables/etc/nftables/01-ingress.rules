@@ -1,0 +1,8 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+table netdev filter {
+  chain ingress {
+    type filter hook ingress devices = $idev priority -500; jump ingress_filter
+  }
+}

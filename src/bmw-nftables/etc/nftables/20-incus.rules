@@ -1,0 +1,29 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+table inet firewall {
+  chain input_hook {
+    # DNS/DHCP from Incus container
+    iifname $iincus udp dport { 53,67,547 } accept
+    iifname $iincus tcp dport 53 accept
+
+    # Response from DNS to Incus container
+    oifname $iincus udp sport { 53,67,547 } accept
+    oifname $iincus tcp sport 53 accept
+  }
+  chain forward_hook {
+    meta nfproto ipv4 oifname $iincus accept
+    meta nfproto ipv4 iifname $iincus accept
+    meta nfproto ipv6 oifname $iincus accept
+    meta nfproto ipv6 iifname $iincus accept
+  }
+}
+
+table ip nat {
+  counter incus_masq {}
+  chain postrouting_hook {
+    ip saddr 10.140.82.0/24 ip daddr != 10.140.82.0/24 counter name incus_masq masquerade;
+#    oifname $iwifi ip6 saddr fd42:b15c:f85e:d3a4::/64 daddr != fd42:b15c:f85e:d3a4::/64 counter name incus_masq masquerade;
+  }
+}
+

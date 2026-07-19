@@ -1,0 +1,38 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+define iwifi  = wlp193s0
+define iincus = incusbr0
+
+# Devices attached to the netdev ingress hook (see 00-ingress.rules).
+# Kept as a list so more interfaces can be added without touching the chain.
+define idev   = { $iwifi }
+
+table inet firewall {
+  set WIFI {
+    type ifname
+    flags constant
+    elements = {
+      $iwifi
+    }
+  }
+  set INCUSBR {
+    type ifname
+    flags constant
+    elements = {
+      $iincus
+    }
+  }
+  # trusted_wifi / trusted_nets_v6 are intentionally left EMPTY here.
+  # They are populated at runtime by an external mechanism (outside this repo).
+  # Note: while empty, @trusted_wifi matches nothing, so the SSH allow rule
+  # (10-ssh.rules) and the trusted-ICMP rules (01-icmp.rules) accept nobody.
+  set trusted_wifi {
+    type ipv4_addr
+    flags interval
+  }
+  set trusted_nets_v6 {
+    type ipv6_addr
+    flags interval
+  }
+}

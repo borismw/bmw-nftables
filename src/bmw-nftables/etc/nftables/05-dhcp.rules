@@ -1,0 +1,36 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+define dhcp_server_interfaces = { $iwifi }
+define dhcp_client_interfaces = { $iwifi }
+
+table inet firewall {
+  set dhcp_server {
+    type inet_service;
+    elements = { 67 }
+  }
+  set dhcp_client {
+    type inet_service;
+    elements = { 68 }
+  }
+  set dhcp6_server {
+    type inet_service;
+    elements = { 547 }
+  }
+  set dhcp6_client {
+    type inet_service;
+    elements = { 546 }
+  }
+  chain input_hook {
+    iifname $dhcp_client_interfaces udp sport @dhcp_server udp dport @dhcp_client counter accept comment "Allow DHCP client input traffic"
+    iifname $dhcp_client_interfaces udp sport @dhcp6_server udp dport @dhcp6_client counter accept comment "Allow DHCPv6 client input traffic"
+    iifname $dhcp_server_interfaces udp dport @dhcp_server udp sport @dhcp_client counter accept comment "Allow DHCP server input traffic"
+    iifname $dhcp_server_interfaces udp dport @dhcp6_server udp sport @dhcp6_client counter accept comment "Allow DHCPv6 server input traffic"
+  }
+  chain output_hook {
+    oifname $dhcp_client_interfaces udp dport @dhcp_server udp sport @dhcp_client counter accept comment "Allow DHCP client output traffic"
+    oifname $dhcp_client_interfaces udp dport @dhcp6_server udp sport @dhcp6_client counter accept comment "Allow DHCPv6 client output traffic"
+    oifname $dhcp_server_interfaces udp sport @dhcp_server udp dport @dhcp_client counter accept comment "Allow DHCP server output traffic"
+    oifname $dhcp_server_interfaces udp sport @dhcp6_server udp dport @dhcp6_client counter accept comment "Allow DHCPv6 server output traffic"
+  }
+}

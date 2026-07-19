@@ -1,0 +1,27 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+define allowed_icmp_types = { echo-reply, echo-request }
+define trusted_icmp_types = { destination-unreachable, time-exceeded }
+define allowed_icmpv6_types = { nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, echo-request, echo-reply }
+
+table inet firewall {
+  chain base_filter {
+    # Jump to chain according to layer 3 protocol using a verdict map
+    # meta protocol map { ip : jump_inbound_ipv4, ip6 : jump_inbound_ipv6 }
+
+    # Alternative to verdict filter
+    ip protocol icmp jump icmp_filter
+    ip6 nexthdr icmpv6 jump icmpv6_filter
+  }
+
+  chain icmp_filter {
+    icmp type $allowed_icmp_types limit rate 5/second counter accept
+    ip saddr @trusted_wifi icmp type $trusted_icmp_types limit rate 5/second counter accept
+    ip daddr @trusted_wifi icmp type $trusted_icmp_types limit rate 5/second counter accept
+  }
+
+  chain icmpv6_filter {
+    icmpv6 type $allowed_icmpv6_types limit rate 5/second counter accept
+  }
+}
