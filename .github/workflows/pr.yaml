@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 5
     if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Prepare for Bash Unit-Testing
         run: sudo apt update && sudo apt install shunit2 shfmt
       - name: Lint
