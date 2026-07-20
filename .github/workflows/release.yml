@@ -28,7 +28,7 @@ jobs:
         run: make release
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: ${{ env.PKG_NAME }} v${{ steps.version.outputs.pkgver }}
           tag_name: ${{ github.ref_name }}
