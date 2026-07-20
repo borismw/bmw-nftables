@@ -70,7 +70,7 @@ jobs:
           sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
 
       - name: Create PR
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/${{ env.PKG_NAME }}-v${{ steps.version.outputs.version }}
           title: "chore: bump bmw-nftables to v${{ steps.version.outputs.version }}"
