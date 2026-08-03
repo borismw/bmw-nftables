@@ -1,0 +1,40 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+define if_incus = "incusbr0"
+
+table inet firewall {
+  set IF_INCUS {
+    type ifname
+    flags constant
+    elements = {
+      $if_incus
+    }
+  }
+
+  chain input_hook {
+    # DNS/DHCP from Incus container
+    iifname @IF_INCUS udp dport { 53,67,547 } accept
+    iifname @IF_INCUS tcp dport 53 accept
+  }
+  chain forward_hook {
+    iifname @IF_INCUS oifname @IF_EXTERN accept comment "Allow forwarding from Incus to external interfaces."
+    oifname @IF_INCUS ct state established,related accept
+  }
+}
+
+table ip nat {
+  set ADDR_INCUS {
+    type ipv4_addr
+    flags interval
+    elements = {
+      10.140.82.0/24
+    }
+  }
+
+  counter incus_masq {}
+
+  chain postrouting_hook {
+    oifname @IF_EXTERN ip saddr @ADDR_INCUS counter name incus_masq masquerade
+  }
+}

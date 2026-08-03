@@ -14,9 +14,7 @@ post_install() {
 #!/usr/sbin/nft -f
 
 # Installed by bmw-nftables-rules. See .bak backup for previous version
-
-flush ruleset
-include "/etc/nftables-main.rules"
+include "/etc/nftables/*.rules"
 
 EOF
     fi

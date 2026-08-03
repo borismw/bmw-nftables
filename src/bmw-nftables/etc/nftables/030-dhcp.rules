@@ -1,8 +1,8 @@
 #! /usr/bin/nft -f
 # vim:set ts=2 sw=2 et:
 
-define dhcp_server_interfaces = { $iwifi }
-define dhcp_client_interfaces = { $iwifi }
+define dhcp_server_interfaces = { $if_wifi }
+define dhcp_client_interfaces = { $if_wifi }
 
 table inet firewall {
   set dhcp_server {

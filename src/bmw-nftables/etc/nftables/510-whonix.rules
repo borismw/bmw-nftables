@@ -1,0 +1,23 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+define if_whonix_ext = { "br-whonix-ext" }
+
+table inet firewall {
+  chain input_hook {
+    iifname $if_whonix_ext udp dport 67 accept
+  }
+
+  chain forward_hook {
+    oifname $if_whonix_ext ct state { established,related } accept
+    ip saddr 10.0.2.0/24 ip daddr 10.0.2.2 accept
+
+    iifname $if_whonix_ext accept
+  }
+}
+
+table ip nat {
+  chain postrouting_hook {
+    ip saddr 10.0.2.0/24 oifname @IF_EXTERN masquerade
+  }
+}

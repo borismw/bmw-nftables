@@ -1,0 +1,63 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+define mdns_daddr = 224.0.0.251
+define mdns_daddr_v6 = ff02::fb
+define mdns_dport = 5353
+
+define llmnr_dport = 5355
+
+define ssdp_daddr = 239.255.255.250
+define ssdp_daddr_v6 = ff02::c
+define ssdp_dport = 1900
+
+define netbios_dport_udp = { 137, 138 }
+define netbios_dport_tcp = 139
+
+table inet firewall {
+  chain input_filter {
+    # Note: Block mDNS if host is rather used as a server than a desktop computer
+    ip saddr @ADDR_TRUSTED ip daddr $mdns_daddr udp dport $mdns_dport counter accept \
+      comment "Allow mDNS multicast on trusted networks"
+
+    #iifname @IF_TRUSTED ip6 daddr $mdns_daddr_v6 udp dport $mdns_dport counter accept \
+    #  comment "Allow mDNS multicast on trusted networks"
+    meta iifname @IF_TRUSTED ip6 daddr $mdns_daddr_v6 udp dport $mdns_dport counter accept \
+      comment "Allow mDNS multicast on trusted networks"
+
+    # Note: Block SSDP if host is rather used as a server than a desktop computer
+    ip saddr @ADDR_TRUSTED ip daddr $ssdp_daddr udp dport $ssdp_dport counter accept \
+      comment "Accept SSDP / uPnP on trusted network"
+
+    meta iifname @IF_TRUSTED ip6 daddr $ssdp_daddr_v6 udp dport $ssdp_dport counter accept
+  }
+
+  chain drop_filter {
+    # Avoid hitting the log statement for noisy traffic by drop-ing it here
+
+    ip daddr $mdns_daddr udp dport $mdns_dport counter drop \
+      comment "Silently drop mDNS which didn't pass filters"
+
+    ip6 daddr $mdns_daddr_v6 udp dport $mdns_dport counter drop \
+      comment "Silently drop mDNS which didn't pass filters"
+
+    udp dport $llmnr_dport counter drop \
+      comment "Drop legacy LLMNR Windows fallback for local network discovery"
+    tcp dport $llmnr_dport counter drop \
+      comment "Drop legacy LLMNR Windows fallback for local network discovery"
+
+    ip daddr $ssdp_daddr udp dport $ssdp_dport counter drop
+    ip6 daddr $ssdp_daddr_v6 udp dport $ssdp_dport counter drop
+
+    udp dport $netbios_dport_udp counter drop \
+      comment "Drop NetBIOS traffic"
+    tcp dport $netbios_dport_tcp counter drop \
+      comment "Drop NetBIOS traffic"
+
+    pkttype broadcast counter drop \
+      comment "Drop layer-2 broadcasts"
+
+    ip6 daddr ff02::/16 counter drop \
+      comment "Drop remaining IPv6 link-local multicast"
+  }
+}

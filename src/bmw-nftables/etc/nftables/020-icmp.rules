@@ -1,0 +1,44 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+define essential_icmp_types = { destination-unreachable, time-exceeded }
+define allowed_icmp_types = { echo-reply, echo-request }
+
+define essential_icmpv6_types = {
+  destination-unreachable,
+  packet-too-big,
+  time-exceeded,
+  parameter-problem,
+  nd-router-solicit,
+  nd-router-advert,
+  nd-neighbor-solicit,
+  nd-neighbor-advert
+}
+
+define allowed_icmpv6_types = {
+    echo-request,
+    echo-reply
+}
+
+table inet firewall {
+  chain base_filter {
+    ip protocol icmp jump icmp_filter
+    meta l4proto icmpv6 jump icmpv6_filter
+  }
+
+  chain icmp_filter {
+    icmp type $essential_icmp_types counter accept \
+      comment "Allow IPv4 error messages"
+
+    icmp type $allowed_icmp_types limit rate 5/second counter accept \
+      comment "Allow IPv4 echo"
+  }
+
+  chain icmpv6_filter {
+    icmpv6 type $essential_icmpv6_types counter accept \
+      comment "Allow IPv6 must-have functionality"
+
+    icmpv6 type $allowed_icmpv6_types limit rate 5/second counter accept \
+      comment "Allow IPv6 echo"
+  }
+}

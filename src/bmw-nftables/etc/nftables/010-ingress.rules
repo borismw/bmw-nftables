@@ -1,0 +1,18 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+table netdev filter {
+  chain ingress_filter {
+    # Drop all fragments
+    ip frag-off & 0x1fff != 0 counter name netdev_drop drop
+
+    # Drop XMAS packets
+    tcp flags & (fin|syn|rst|psh|ack|urg) == fin|syn|rst|psh|ack|urg counter name netdev_drop drop
+
+    # Drop NULL packets
+    tcp flags & (fin|syn|rst|psh|ack|urg) == 0x0 counter name netdev_drop drop
+
+    # Drop uncommon MSS values
+    tcp flags syn tcp option maxseg size 1-535 counter name netdev_drop drop
+  }
+}

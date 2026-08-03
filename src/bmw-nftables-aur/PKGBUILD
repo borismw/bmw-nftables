@@ -19,7 +19,6 @@ pkgver() {
 }
 
 package() {
-    install -Dm 640 "$srcdir/etc/nftables-main.rules" "$pkgdir/etc/nftables-main.rules"
     for file in "$srcdir"/etc/nftables/*.rules; do
         install -Dm 640 "$file" "$pkgdir/etc/nftables/${file##*/}"
     done

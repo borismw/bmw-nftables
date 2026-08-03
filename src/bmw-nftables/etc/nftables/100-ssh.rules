@@ -2,12 +2,11 @@
 # vim:set ts=2 sw=2 et:
 
 table inet firewall {
-  chain ssh_filter {
-    ip saddr @trusted_wifi counter accept
-  }
-  
-  chain base_filter {
+  chain input_hook {
     tcp dport 22 counter jump ssh_filter
   }
-}
 
+  chain ssh_filter {
+    ip saddr @ADDR_TRUSTED counter accept
+  }
+}

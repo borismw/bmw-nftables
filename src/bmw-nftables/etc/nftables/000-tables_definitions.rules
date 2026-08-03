@@ -1,0 +1,134 @@
+#! /usr/bin/nft -f
+# vim:set ts=2 sw=2 et:
+
+# IPv4/IPv6 Simple & Safe firewall ruleset.
+# More examples in /usr/share/nftables/ and /usr/share/doc/nftables/examples/.
+add table inet firewall
+add table ip nat
+add table netdev filter
+flush table inet firewall
+flush table ip nat
+flush table netdev filter
+
+define if_wifi  = "wlp193s0"
+define if_ingress = { $if_wifi }
+define if_extern = { $if_wifi }
+
+table inet firewall {
+
+  # Static interface groups
+  set IF_EXTERN {
+    type ifname
+    flags constant
+    elements = $if_extern
+  }
+
+  # Interfaces belonging / attached to a trusted network. Supposed to be populated at runtime
+  set IF_TRUSTED {
+    type ifname
+  }
+
+  # ADDR_TRUSTED / ADDR_TRUSTED_V6 are supposed to be populated at runtime by an external mechanism.
+  set ADDR_TRUSTED {
+    type ipv4_addr
+    flags interval
+  }
+  set ADDR_TRUSTED_V6 {
+    type ipv6_addr
+    flags interval
+  }
+
+  chain inbound {
+    type filter hook input priority 200; policy drop;
+
+    counter jump base_filter
+    counter jump input_hook
+
+    iifname lo counter accept
+    oifname lo counter accept
+
+    log prefix "[nftables] Inbound denied: " counter drop
+  }
+
+  chain input_hook {}
+
+  chain base_filter {
+    ct state vmap {
+      established : accept,
+      related : accept,
+      new : continue,
+      invalid : drop
+    }
+
+    counter jump drop_filter
+  }
+
+  chain drop_filter {}
+
+  chain forward_hook {}
+
+  chain forward {
+    type filter hook forward priority 200; policy drop;
+
+    counter jump base_filter
+    counter jump forward_hook
+
+    log prefix "[nftables] Forward denied: " counter drop
+  }
+
+  chain output {
+    type filter hook output priority 0; policy accept;
+
+    # counter jump output_hook
+    # counter jump base_filter
+
+    # log prefix "[nftables] Outbound denied: " counter reject
+  }
+
+  chain output_hook {}
+}
+
+table ip nat {
+  # Sets are table-local so this needs to be repeated here.
+  set IF_EXTERN {
+    type ifname
+    flags constant
+    elements = $if_extern
+  }
+
+  chain prerouting {
+    type nat hook prerouting priority 0
+    jump prerouting_hook
+  }
+
+  chain prerouting_hook {}
+
+  chain postrouting {
+    type nat hook postrouting priority 500
+    jump postrouting_hook
+  }
+
+  chain postrouting_hook {}
+}
+
+
+# Devices attached to the netdev ingress hook (see 00-ingress.rules).
+# Kept as a list so more interfaces can be added without touching the chain.
+
+table netdev filter {
+  set IF_INGRESS {
+    type ifname
+    flags constant
+    elements = $if_ingress
+  }
+
+  counter netdev_drop {}
+
+  chain ingress_filter {}
+
+  chain ingress {
+    type filter hook ingress devices = $if_ingress priority 0
+
+    jump ingress_filter
+  }
+}
