@@ -33,7 +33,7 @@ jobs:
           name: ${{ env.PKG_NAME }} v${{ steps.version.outputs.pkgver }}
           tag_name: ${{ github.ref_name }}
           draft: true
-          files: ${{ env.PKG_NAME }}-v${{ steps.version.outputs.pkgver }}-sources.tar.gz
+          files: build/${{ env.PKG_NAME }}-v${{ steps.version.outputs.pkgver }}-sources.tar.gz
 
   update-pkgbuild:
     runs-on: ubuntu-latest
@@ -63,7 +63,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update PKGBUILD
-        working-directory: src/${{ env.PKG_NAME }}-aur
+        working-directory: package/archlinux
         run: |
           sed -i "s/^pkgver=.*/pkgver=${{ steps.version.outputs.version }}/" PKGBUILD
           sed -i "s/^sha256sums=.*/sha256sums=(\"${{ steps.checksum.outputs.sha256 }}\" \"SKIP\")/" PKGBUILD

@@ -15,6 +15,7 @@ pkgver = $(pkgver_prefixed:$(tag_prefix)%=%)
 pkgname := bmw-nftables
 
 src_directory := $(mkfile_path)/src/$(pkgname)/
+SRC_DIR := $(mkfile_path)/src
 
 clean:
 	rm $(pkgname)-*-sources.tar.gz
@@ -22,9 +23,9 @@ clean:
 ci: lint
 
 lint-sh:
-	shfmt -i 4 -d "$(mkfile_path)/src/bmw-nftables-aur/bmw-nftables-rules.install"
-	shfmt -i 4 -d "$(mkfile_path)/src/bmw-nftables-aur/PKGBUILD"
-	shellcheck --shell=bash --exclude=SC2034,SC2154,SC2164 "$(mkfile_path)/src/bmw-nftables-aur/PKGBUILD"
+	shfmt -i 4 -d "$(mkfile_path)/package/archlinux/bmw-nftables-rules.install"
+	shfmt -i 4 -d "$(mkfile_path)/package/archlinux/PKGBUILD"
+	shellcheck --shell=bash --exclude=SC2034,SC2154,SC2164 "$(mkfile_path)/package/archlinux/PKGBUILD"
 
 lint: lint-sh
 
@@ -36,12 +37,12 @@ release: $(pkgname)-v$(pkgver)-sources.tar.gz
 $(pkgname)-v$(pkgver)-sources.tar.gz:
 	# Reproducible archives https://gist.github.com/stokito/c588b8d6a6a0aee211393d68eea678f2
 	tar \
-	  --directory $(src_directory) \
+	  --directory $(SRC_DIR) \
 	  --sort=name \
 	  --mtime 'UTC 1980-02-01' \
 	  --owner=0 --group=0 --numeric-owner \
 	  --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
 	  --use-compress-program 'gzip -9' \
-	  -cf "$(pkgname)-v$(pkgver)-sources.tar.gz" "etc/"
+	  -cf "$@" "$(SRC_DIR)/etc/"
 	TZ=UTC touch -a -m -t 198002010000.00 "$(pkgname)-v$(pkgver)-sources.tar.gz"
 
