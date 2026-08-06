@@ -21,7 +21,7 @@ define allowed_icmpv6_types = {
 }
 
 table inet firewall {
-  chain base_filter {
+  chain input_hook {
     ip protocol icmp jump icmp_filter
     meta l4proto icmpv6 jump icmpv6_filter
   }

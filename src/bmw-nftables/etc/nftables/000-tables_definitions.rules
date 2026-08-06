@@ -11,11 +11,11 @@ flush table ip nat
 flush table netdev filter
 
 define if_wifi  = "wlp193s0"
-define if_ingress = { $if_wifi }
-define if_extern = { $if_wifi }
+define if_eth = "eth0"
+define if_ingress = { $if_wifi, $if_eth }
+define if_extern = { $if_wifi, $if_eth }
 
 table inet firewall {
-
   # Static interface groups
   set IF_EXTERN {
     type ifname
@@ -47,6 +47,8 @@ table inet firewall {
     iifname lo counter accept
     oifname lo counter accept
 
+    counter jump drop_filter
+
     log prefix "[nftables] Inbound denied: " counter drop
   }
 
@@ -59,8 +61,6 @@ table inet firewall {
       new : continue,
       invalid : drop
     }
-
-    counter jump drop_filter
   }
 
   chain drop_filter {}
