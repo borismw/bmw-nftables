@@ -14,11 +14,14 @@ pkgver = $(pkgver_prefixed:$(tag_prefix)%=%)
 
 pkgname := bmw-nftables
 
-src_directory := $(mkfile_path)/src/$(pkgname)/
+BUILD_DIR := $(mkfile_path)/build
 SRC_DIR := $(mkfile_path)/src
 
+$(BUILD_DIR):
+	mkdir -p $@
+
 clean:
-	rm $(pkgname)-*-sources.tar.gz
+	rm -rf $(BUILD_DIR)
 
 ci: lint
 
@@ -32,9 +35,9 @@ lint: lint-sh
 pkgver:
 	@echo "$(pkgver)"
 
-release: $(pkgname)-v$(pkgver)-sources.tar.gz
+release: $(BUILD_DIR)/$(pkgname)-v$(pkgver)-sources.tar.gz
 
-$(pkgname)-v$(pkgver)-sources.tar.gz:
+$(BUILD_DIR)/$(pkgname)-v$(pkgver)-sources.tar.gz: | $(BUILD_DIR)
 	# Reproducible archives https://gist.github.com/stokito/c588b8d6a6a0aee211393d68eea678f2
 	tar \
 	  --directory $(SRC_DIR) \
@@ -44,5 +47,5 @@ $(pkgname)-v$(pkgver)-sources.tar.gz:
 	  --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
 	  --use-compress-program 'gzip -9' \
 	  -cf "$@" "$(SRC_DIR)/etc/"
-	TZ=UTC touch -a -m -t 198002010000.00 "$(pkgname)-v$(pkgver)-sources.tar.gz"
+	TZ=UTC touch -a -m -t 198002010000.00 "$@"
 
