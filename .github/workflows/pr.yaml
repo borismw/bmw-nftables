@@ -22,3 +22,12 @@ jobs:
       - name: Lint
         id: unit-tests
         run: make lint
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Validate package
+        uses: heyhusen/archlinux-package-action@6e56ed13fbdb4899f264783ae2d70d7c397d9c0e
+        with:
+          path: 'package/archlinux'
+          flags: ''
+          namcap: true
+          srcinfo: false
