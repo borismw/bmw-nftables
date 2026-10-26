@@ -25,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Validate package
-        uses: heyhusen/archlinux-package-action@6e56ed13fbdb4899f264783ae2d70d7c397d9c0e
+        uses: heyhusen/archlinux-package-action@c1d59873c60e6941831f2b10d7e24de07878a851
         with:
           path: 'package/archlinux'
           flags: ''
