@@ -1,22 +1,27 @@
 # Maintainer: borismw <52957119+borismw@users.noreply.github.com>
 pkgname=bmw-nftables
 pkgver=0.2.1
-pkgrel=1
+pkgrel=2
 pkgdesc='Modular firewall ruleset on top of nftables'
 arch=('any')
 url='https://github.com/borismw/bmw-nftables/tree/main'
 license=('MIT')
-depends=('nftables' 'networkmanager')
-backup=('etc/nftables.conf')
+depends=('nftables')
+backup=(
+    'etc/nftables/000-tables_definitions.rules'
+    'etc/nftables/010-ingress.rules'
+    'etc/nftables/020-icmp.rules'
+    'etc/nftables/021-service_discovery.rules'
+    'etc/nftables/030-dhcp.rules'
+    'etc/nftables/100-ssh.rules'
+    'etc/nftables/500-incus.rules'
+    'etc/nftables/510-whonix.rules'
+)
 options=('!debug')
-install='bmw-nftables-rules.install'
+install='bmw-nftables.install'
 source=("https://github.com/borismw/bmw-nftables/releases/download/v${pkgver}/${pkgname}-v${pkgver}-sources.tar.gz" "https://github.com/borismw/bmw-nftables/releases/download/v${pkgver}/${pkgname}-v${pkgver}-sources.tar.gz.sig")
 validpgpkeys=("FAFBEC9638D5B553EE404868A6856139D938A2B5")
 sha256sums=("34d6cb17b493e5b8e7eb68b6806e6f1368d903076342f9e908c070bd85f00b08" "57c6b4384fbde1d6012890432dfd2ba720fbba5f0a1bb23c31a25257ed40b4ed")
-
-pkgver() {
-    echo "$pkgver"
-}
 
 package() {
     for file in "$srcdir"/etc/nftables/*.rules; do

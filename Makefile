@@ -26,7 +26,7 @@ clean:
 ci: lint
 
 lint-sh:
-	shfmt -i 4 -d "$(mkfile_path)/package/archlinux/bmw-nftables-rules.install"
+	shfmt -i 4 -d "$(mkfile_path)/package/archlinux/bmw-nftables.install"
 	shfmt -i 4 -d "$(mkfile_path)/package/archlinux/PKGBUILD"
 	shellcheck --shell=bash --exclude=SC2034,SC2154,SC2164 "$(mkfile_path)/package/archlinux/PKGBUILD"
 

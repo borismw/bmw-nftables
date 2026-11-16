@@ -1,0 +1,21 @@
+_include_line='include "/etc/nftables/*.rules"'
+
+_check_config() {
+    if ! grep -qxF "$_include_line" /etc/nftables.conf 2>/dev/null; then
+        cat <<EOF
+==> bmw-nftables: /etc/nftables.conf does not include the ruleset yet.
+    Add the following line to /etc/nftables.conf:
+        $_include_line
+    Then check and apply it:
+        nft -c -f /etc/nftables.conf && systemctl reload nftables
+EOF
+    fi
+}
+
+post_install() {
+    _check_config
+}
+
+post_upgrade() {
+    _check_config
+}
