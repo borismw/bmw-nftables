@@ -30,7 +30,7 @@ jobs:
       - name: Build source archive from PR
         run: |
           make release
-          # Move the source files next to the PKGBUILD, so the following step uses the current repo state for validation 
+          # Move the source files next to the PKGBUILD, so the following step uses the current repo state for validation
           mv build/bmw-nftables-v*-sources.tar.gz package/archlinux
       - name: Validate package
         uses: heyhusen/archlinux-package-action@c1d59873c60e6941831f2b10d7e24de07878a851
@@ -40,3 +40,21 @@ jobs:
           flags: '--skipinteg'
           namcap: true
           srcinfo: false
+
+  debian:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.actor != 'dependabot[bot]'
+    container: debian:stable
+    steps:
+      - name: Install build tools
+        run: apt-get update && apt-get install -y --no-install-recommends build-essential debhelper devscripts lintian git make
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: '0'
+      - name: Build .deb
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          make deb
+      - name: Lintian
+        run: lintian --fail-on error,warning build/deb/*.deb
