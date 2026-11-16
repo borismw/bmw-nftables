@@ -1,0 +1,5 @@
+bmw-nftables (0.2.1) unstable; urgency=medium
+
+  * Initial Debian packaging.
+
+ -- borismw <52957119+borismw@users.noreply.github.com>  Mon, 16 Nov 2026 12:00:00 +0000

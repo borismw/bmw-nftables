@@ -1,0 +1,15 @@
+Source: bmw-nftables
+Section: net
+Priority: optional
+Maintainer: borismw <52957119+borismw@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Homepage: https://github.com/borismw/bmw-nftables
+Rules-Requires-Root: no
+
+Package: bmw-nftables
+Architecture: all
+Depends: nftables, ${misc:Depends}
+Description: Modular firewall ruleset on top of nftables
+ A set of modular nftables rule files installed to /etc/nftables/.
+ Include them from /etc/nftables.conf to activate the ruleset.
