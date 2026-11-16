@@ -5,7 +5,7 @@ define git_tag_with_prefix
 $(eval $@_TAGPREFIX = $(addsuffix *,$(1)))$(shell git describe --tags --abbrev=0 --match '${$@_TAGPREFIX}')
 endef
 
-.PHONY: ci lint linst-sh clean release pkgver
+.PHONY: ci lint lint-sh clean release pkgver
 
 tag_prefix := v
 

@@ -17,6 +17,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Makefile invokes git describe to find out the version. This does not work without history.
+          fetch-depth: '0'
 
       - name: Extract version from tag
         id: version
@@ -80,4 +83,4 @@ jobs:
             Updates `pkgver` and `sha256sums` in the PKGBUILD to match
             release [${{ env.PKG_NAME }}/v${{ steps.version.outputs.version }}](https://github.com/borismw/${{ env.REPOSITORY_NAME }}/releases/tag/v${{ steps.version.outputs.version }}).
           commit-message: "chore: bump ${{ env.PKG_NAME }} to v${{ steps.version.outputs.version }}"
-          add-paths: src/${{ env.PKG_NAME }}-aur/PKGBUILD
+          add-paths: package/archlinux/PKGBUILD

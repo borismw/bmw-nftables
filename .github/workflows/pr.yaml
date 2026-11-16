@@ -17,17 +17,26 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Makefile invokes git describe to find out the version. This does not work without history.
+          fetch-depth: '0'
       - name: Prepare for Bash Unit-Testing
-        run: sudo apt update && sudo apt install shunit2 shfmt
+        run: sudo apt update && sudo apt install shfmt
+
       - name: Lint
-        id: unit-tests
+        id: lint
         run: make lint
-      - name: Checkout repository
-        uses: actions/checkout@v7
+
+      - name: Build source archive from PR
+        run: |
+          make release
+          # Move the source files next to the PKGBUILD, so the following step uses the current repo state for validation 
+          mv build/bmw-nftables-v*-sources.tar.gz package/archlinux
       - name: Validate package
         uses: heyhusen/archlinux-package-action@c1d59873c60e6941831f2b10d7e24de07878a851
         with:
           path: 'package/archlinux'
-          flags: ''
+          # Since the sources come from a file in the same directory, the integrity does not match
+          flags: '--skipinteg'
           namcap: true
           srcinfo: false
