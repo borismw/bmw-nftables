@@ -1,0 +1,25 @@
+define port_ausweisapp = 24727
+
+table inet firewall {
+
+  chain input_hook {
+    meta nfproto ipv4 th dport $port_ausweisapp jump ausweisapp_filter
+    meta nfproto ipv6 th dport $port_ausweisapp jump ausweisappv6_filter
+  }
+
+  chain ausweisapp_filter {
+    ip saddr @ADDR_TRUSTED fib daddr type broadcast udp dport $port_ausweisapp accept \
+      comment "Allow AusweisApp udp broadcast on trusted networks"
+
+    ip saddr @ADDR_TRUSTED fib daddr type local tcp dport $port_ausweisapp counter accept \
+      comment "Allow AusweisApp incoming tcp connection on trusted network"
+  }
+
+  chain ausweisappv6_filter {
+    ip6 saddr @ADDR_TRUSTED_V6 ip6 daddr ff02::1 udp dport $port_ausweisapp accept \
+      comment "Allow AusweisApp IPv6 udp broadcast on trusted networks"
+
+    ip6 saddr @ADDR_TRUSTED_V6 fib daddr type local tcp dport $port_ausweisapp counter accept \
+      comment "Allow AusweisApp IPv6 incoming tcp connection on trusted network"
+  }
+}
